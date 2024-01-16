@@ -5,6 +5,10 @@
 
 #include <QtCore/qobject.h>
 
+#ifdef QT_GUI_LIB
+#   include <QtGui/qcolor.h>
+#endif
+
 namespace GameIO {
 
 class GamepadPrivate;
@@ -32,9 +36,9 @@ public:
     Q_SIGNAL void connectionStateChanged(bool connected);
 
 #ifdef QT_GUI_LIB
-    inline QColor ledColor() const
+    QColor ledColor() const
     { return QColor(ledRed(), ledGreen(), ledBlue()); }
-    inline void setLedColor(const QColor &color)
+    void setLedColor(const QColor &color)
     { setLedColor(color.red(), color.green(), color.blue()); }
 #endif
     int ledRed() const;

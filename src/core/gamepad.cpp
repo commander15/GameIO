@@ -12,7 +12,7 @@ Gamepad::Gamepad(int id, QObject *parent) :
 {
     setId(id);
 
-    GamepadManagerPrivate *man = GamepadManager::instance()->d.data();
+    GamepadManagerPrivate *man = d->manager();
     connect(man, &GamepadManagerPrivate::gamepadAdded, this, &Gamepad::processGamepadAdd);
     connect(man, &GamepadManagerPrivate::gamepadRemoved, this, &Gamepad::processGamepadRemove);
     connect(man, &GamepadManagerPrivate::gamepadNamed, this, &Gamepad::processGamepadName);
@@ -453,6 +453,11 @@ SDL_GameController *GamepadPrivate::controller() const
 SDL_Joystick *GamepadPrivate::joystick() const
 {
     return manager()->gamepadJoystick(id);
+}
+
+GamepadManagerPrivate *GamepadPrivate::manager() const
+{
+    return GamepadManager::instance()->d.data();
 }
 
 }

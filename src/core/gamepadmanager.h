@@ -28,7 +28,7 @@ private:
     QScopedPointer<GamepadManagerPrivate> d;
     static QScopedPointer<GamepadManager> self;
 
-    friend class Gamepad;
+    friend class GamepadPrivate;
 };
 
 enum GamepadButton {
