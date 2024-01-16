@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/axis.png</file>
+        <file>icons/button.png</file>
+        <file>icons/controllermap.svg</file>
+    </qresource>
+</RCC>

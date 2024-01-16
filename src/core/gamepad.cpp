@@ -49,6 +49,30 @@ bool Gamepad::isConnected() const
     return d->connected;
 }
 
+int Gamepad::ledRed() const
+{
+    return d->ledRed;
+}
+
+int Gamepad::ledGreen() const
+{
+    return d->ledGreen;
+}
+
+int Gamepad::ledBlue() const
+{
+    return d->ledBlue;
+}
+
+void Gamepad::setLedColor(int red, int green, int blue)
+{
+    if (SDL_JoystickSetLED(d->joystick(), red, green, blue)) {
+        d->ledRed = red;
+        d->ledGreen = green;
+        d->ledBlue = blue;
+    }
+}
+
 bool Gamepad::buttonLeft() const
 {
     return d->buttons.value(ButtonLeft);
@@ -391,7 +415,10 @@ void Gamepad::processAxisMove(int id, int axis, double value)
 GamepadPrivate::GamepadPrivate(Gamepad *qq) :
     q(qq),
     id(-1),
-    connected(false)
+    connected(false),
+    ledRed(0),
+    ledGreen(0),
+    ledBlue(0)
 {
     buttons.insert(ButtonLeft, 0.0);
     buttons.insert(ButtonRight, 0.0);
@@ -416,6 +443,16 @@ GamepadPrivate::GamepadPrivate(Gamepad *qq) :
     axis.insert(AxisLeftY, 0.0);
     axis.insert(AxisRightX, 0.0);
     axis.insert(AxisRightY, 0.0);
+}
+
+SDL_GameController *GamepadPrivate::controller() const
+{
+    return manager()->gamepadController(id);
+}
+
+SDL_Joystick *GamepadPrivate::joystick() const
+{
+    return manager()->gamepadJoystick(id);
 }
 
 }

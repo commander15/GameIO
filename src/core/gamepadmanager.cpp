@@ -1,10 +1,18 @@
 #include "gamepadmanager.h"
 #include "gamepadmanager_p.h"
 
+#include <QtCore/qsystemdetection.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qfile.h>
 
 #include <SDL2/SDL_gamecontroller.h>
 #include <SDL2/SDL_joystick.h>
+
+#ifdef Q_OS_LINUX
+#   define MAPPING_FILE ":/configs/gamecontrollerdb_linux.txt"
+#elif defined(Q_OS_WINDOWS)
+#   define MAPPING_FILE ":/configs/gamecontrollerdb_windows.txt"
+#endif
 
 #define AXIS_DEAD_ZONE 20000
 
@@ -68,6 +76,11 @@ SDL_GameController *GamepadManagerPrivate::gamepadController(int id) const
     return m_indexForController.value(index);
 }
 
+SDL_Joystick *GamepadManagerPrivate::gamepadJoystick(int id) const
+{
+    return SDL_GameControllerGetJoystick(gamepadController(id));
+}
+
 void GamepadManagerPrivate::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
@@ -81,6 +94,15 @@ bool GamepadManagerPrivate::init()
         qDebug() << SDL_GetError();
         return false;
     }
+
+#ifdef MAPPING_FILE
+    // Loading mappings
+    QFile file(MAPPING_FILE);
+    file.open(QIODevice::ReadOnly);
+    if (!SDL_GameControllerAddMapping(file.readAll().toStdString().c_str()))
+        qDebug("Failed to load Game Controller Mappings");
+    file.close();
+#endif
 
     startTimer(100);
     for (int i = 0; i < SDL_NumJoysticks() ; i++)

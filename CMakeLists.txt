@@ -10,10 +10,12 @@ option(GAMEIO_BUILD_TEST    "Build tests" OFF)
 option(GAMEIO_BUILD_MONITOR "Build gamepad monitor tool")
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 find_package(Cm REQUIRED)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 find_package(SDL2 REQUIRED)
 

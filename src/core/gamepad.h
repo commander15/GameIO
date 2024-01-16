@@ -31,6 +31,17 @@ public:
     Q_SIGNAL void disconnected();
     Q_SIGNAL void connectionStateChanged(bool connected);
 
+#ifdef QT_GUI_LIB
+    inline QColor ledColor() const
+    { return QColor(ledRed(), ledGreen(), ledBlue()); }
+    inline void setLedColor(const QColor &color)
+    { setLedColor(color.red(), color.green(), color.blue()); }
+#endif
+    int ledRed() const;
+    int ledGreen() const;
+    int ledBlue() const;
+    void setLedColor(int red, int green, int blue);
+
     bool buttonLeft() const;
     Q_SIGNAL void buttonLeftChanged(bool value);
 

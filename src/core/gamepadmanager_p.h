@@ -21,6 +21,7 @@ public:
     QString gamepadName(int id) const;
     bool isGamepadConnected(int id) const;
     SDL_GameController *gamepadController(int id) const;
+    SDL_Joystick *gamepadJoystick(int id) const;
 
     Q_SIGNAL void gamepadAdded(int id);
     Q_SIGNAL void gamepadRemoved(int id);

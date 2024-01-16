@@ -1,6 +1,6 @@
-cm_add_library(gameio)
+cm_add_library(gameio gameio_res.qrc)
 
-target_link_libraries(gameio PUBLIC Qt::Core Qt::Gui SDL2::SDL2)
+target_link_libraries(gameio PUBLIC Qt::Core SDL2::SDL2)
 
 configure_file(config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h @ONLY)
 
