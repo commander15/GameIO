@@ -22,6 +22,7 @@ public:
     bool isGamepadConnected(int id) const;
     SDL_GameController *gamepadController(int id) const;
     SDL_Joystick *gamepadJoystick(int id) const;
+    SDL_Haptic *gamepadHaptic(int id) const;
 
     Q_SIGNAL void gamepadAdded(int id);
     Q_SIGNAL void gamepadRemoved(int id);
@@ -43,8 +44,11 @@ private:
     static int translateButton(Uint8 button);
     static double translateValue(double value);
 
-    QHash<int, SDL_GameController *> m_indexForController;
     QHash<int, int> m_instanceIdForIndex;
+    QHash<int, SDL_GameController *> m_indexForController;
+    mutable QHash<int, SDL_Haptic *> m_haptics;
+
+    uint m_subSystems;
 
     friend class GamepadManager;
 };

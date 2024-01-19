@@ -3,10 +3,13 @@
 
 #include <QtCore/qsystemdetection.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qstandardpaths.h>
+#include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
 
 #include <SDL2/SDL_gamecontroller.h>
 #include <SDL2/SDL_joystick.h>
+#include <SDL2/SDL_haptic.h>
 
 #ifdef Q_OS_LINUX
 #   define MAPPING_FILE ":/configs/gamecontrollerdb_linux.txt"
@@ -14,7 +17,7 @@
 #   define MAPPING_FILE ":/configs/gamecontrollerdb_windows.txt"
 #endif
 
-#define AXIS_DEAD_ZONE 20000
+#define AXIS_DEAD_ZONE 10000.0
 
 namespace GameIO {
 
@@ -54,8 +57,12 @@ GamepadManager *GamepadManager::instance()
 QScopedPointer<GamepadManager> GamepadManager::self;
 
 GamepadManagerPrivate::GamepadManagerPrivate(GamepadManager *qq) :
-    q(qq)
+    q(qq),
+    m_subSystems(0x0)
 {
+    m_subSystems |= SDL_INIT_GAMECONTROLLER;
+    m_subSystems |= SDL_INIT_JOYSTICK;
+    m_subSystems |= SDL_INIT_HAPTIC;
 }
 
 QString GamepadManagerPrivate::gamepadName(int id) const
@@ -81,6 +88,17 @@ SDL_Joystick *GamepadManagerPrivate::gamepadJoystick(int id) const
     return SDL_GameControllerGetJoystick(gamepadController(id));
 }
 
+SDL_Haptic *GamepadManagerPrivate::gamepadHaptic(int id) const
+{
+    if (!m_haptics.contains(id)) {
+        SDL_Haptic *haptic = SDL_HapticOpenFromJoystick(gamepadJoystick(id));
+        if (haptic)
+            m_haptics.insert(id, haptic);
+        return haptic;
+    } else
+        return m_haptics.value(id);
+}
+
 void GamepadManagerPrivate::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
@@ -90,30 +108,35 @@ void GamepadManagerPrivate::timerEvent(QTimerEvent *event)
 bool GamepadManagerPrivate::init()
 {
     //Initialize SDL with necessary subsystems for gamepad support
-    if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK)) {
+    if (SDL_Init(m_subSystems)) {
         qDebug() << SDL_GetError();
         return false;
     }
 
 #ifdef MAPPING_FILE
-    // Loading mappings
     QFile file(MAPPING_FILE);
     file.open(QIODevice::ReadOnly);
-    if (!SDL_GameControllerAddMapping(file.readAll().toStdString().c_str()))
-        qDebug("Failed to load Game Controller Mappings");
+
+    while (!file.atEnd()) {
+        QByteArray mapping = file.readLine();
+        if (!mapping.isEmpty() && !mapping.startsWith('#'))
+            SDL_GameControllerAddMapping(mapping.constData());
+    }
+
     file.close();
 #endif
 
-    startTimer(100);
     for (int i = 0; i < SDL_NumJoysticks() ; i++)
         addController(i);
+
+    startTimer(100);
 
     return true;
 }
 
 void GamepadManagerPrivate::cleanup()
 {
-    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+    SDL_QuitSubSystem(m_subSystems);
 }
 
 void GamepadManagerPrivate::runLoop()
@@ -247,9 +270,10 @@ int GamepadManagerPrivate::translateButton(Uint8 button)
 
 double GamepadManagerPrivate::translateValue(double value)
 {
-    if (value < AXIS_DEAD_ZONE * -1 || value > AXIS_DEAD_ZONE) {
-        double deadZone = (value <= 0.0 ? AXIS_DEAD_ZONE : AXIS_DEAD_ZONE * -1);
-        return (value + deadZone) / ((value >= 0.0 ? 32767.0 : 32768.0) + deadZone);
+    if (value < AXIS_DEAD_ZONE * -1.0 || value > AXIS_DEAD_ZONE) {
+        const double deadZone = AXIS_DEAD_ZONE * (value < 0.0 ? 1.0 : -1.0);
+        const double max = (value < 0.0 ? 32768.0 : 32767.0);
+        return (value + deadZone) / (max - AXIS_DEAD_ZONE);
     } else
         return 0.0;
 }
