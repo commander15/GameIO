@@ -31,6 +31,9 @@ GamepadWidget::GamepadWidget(QWidget *parent)
         label->hide();
         m_axes.insert(axis, label);
     }
+
+    connect(ui->changeColorButton, &QAbstractButton::clicked, this, &GamepadWidget::changeColor);
+    connect(ui->vibrateButton, &QAbstractButton::clicked, this, &GamepadWidget::vibrate);
 }
 
 GamepadWidget::~GamepadWidget()
@@ -52,19 +55,34 @@ void GamepadWidget::setGamepad(GameIO::Gamepad *gamepad)
     connect(gamepad, &GameIO::Gamepad::buttonAChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonA, value);});
     connect(gamepad, &GameIO::Gamepad::buttonBChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonB, value);});
     connect(gamepad, &GameIO::Gamepad::buttonL1Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonL1, value);});
-    connect(gamepad, &GameIO::Gamepad::buttonL2Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonL2, value);});
-    connect(gamepad, &GameIO::Gamepad::buttonL3Changed, this, [=](double value) {processButtonChange(GameIO::ButtonL3, value);});
+    connect(gamepad, &GameIO::Gamepad::buttonL2Changed, this, [=](double value) {processButtonChange(GameIO::ButtonL2, value);});
+    connect(gamepad, &GameIO::Gamepad::buttonL3Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonL3, value);});
     connect(gamepad, &GameIO::Gamepad::buttonR1Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonR1, value);});
-    connect(gamepad, &GameIO::Gamepad::buttonR2Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonR2, value);});
-    connect(gamepad, &GameIO::Gamepad::buttonR3Changed, this, [=](double value) {processButtonChange(GameIO::ButtonR3, value);});
+    connect(gamepad, &GameIO::Gamepad::buttonR2Changed, this, [=](double value) {processButtonChange(GameIO::ButtonR2, value);});
+    connect(gamepad, &GameIO::Gamepad::buttonR3Changed, this, [=](bool value) {processButtonChange(GameIO::ButtonR3, value);});
     connect(gamepad, &GameIO::Gamepad::buttonSelectChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonSelect, value);});
     connect(gamepad, &GameIO::Gamepad::buttonStartChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonStart, value);});
     connect(gamepad, &GameIO::Gamepad::buttonCenterChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonCenter, value);});
     connect(gamepad, &GameIO::Gamepad::buttonGuideChanged, this, [=](bool value) {processButtonChange(GameIO::ButtonGuide, value);});
-    connect(gamepad, &GameIO::Gamepad::axisLeftXChanged, this, [=](bool value) {processAxisMove(GameIO::AxisLeftX, value);});
-    connect(gamepad, &GameIO::Gamepad::axisLeftYChanged, this, [=](bool value) {processAxisMove(GameIO::AxisLeftY, value);});
-    connect(gamepad, &GameIO::Gamepad::axisRightXChanged, this, [=](bool value) {processAxisMove(GameIO::AxisRightX, value);});
-    connect(gamepad, &GameIO::Gamepad::axisRightYChanged, this, [=](bool value) {processAxisMove(GameIO::AxisRightY, value);});
+    connect(gamepad, &GameIO::Gamepad::axisLeftXChanged, this, [=](double value) {processAxisMove(GameIO::AxisLeftX, value);});
+    connect(gamepad, &GameIO::Gamepad::axisLeftYChanged, this, [=](double value) {processAxisMove(GameIO::AxisLeftY, value);});
+    connect(gamepad, &GameIO::Gamepad::axisRightXChanged, this, [=](double value) {processAxisMove(GameIO::AxisRightX, value);});
+    connect(gamepad, &GameIO::Gamepad::axisRightYChanged, this, [=](double value) {processAxisMove(GameIO::AxisRightY, value);});
+
+    m_gamepad = gamepad;
+}
+
+void GamepadWidget::changeColor()
+{
+    QColor color(ui->colorInput->text());
+    ui->colorInput->setStyleSheet("color: " + color.name());
+    m_gamepad->setLedColor(color);
+}
+
+void GamepadWidget::vibrate()
+{
+    if (m_gamepad)
+        m_gamepad->vibrate();
 }
 
 QPoint GamepadWidget::buttonPos(int button) const
@@ -86,10 +104,10 @@ QPoint GamepadWidget::buttonPos(int button) const
         return QPoint(474, 198);
 
     case GameIO::ButtonY:
-        return QPoint(526, 241);
+        return QPoint(531, 152);
 
     case GameIO::ButtonA:
-        return QPoint(531, 152);
+        return QPoint(526, 241);
 
     case GameIO::ButtonB:
         return QPoint(586, 193);
@@ -158,12 +176,12 @@ void GamepadWidget::processButtonChange(int button, double pression)
     w->setVisible(pression == 1.0 ? true : false);
 
     switch (button) {
-    case GameIO::ButtonL3:
-        ui->l3Output->setValue(pression * 100);
+    case GameIO::ButtonL2:
+        ui->l2Output->setValue(pression * 100);
         break;
 
-    case GameIO::ButtonR3:
-        ui->r3Output->setValue(pression * 100);
+    case GameIO::ButtonR2:
+        ui->r2Output->setValue(pression * 100);
         break;
 
     default:
@@ -204,13 +222,16 @@ QList<int> GamepadWidget::axes() const
 void GamepadWidget::processAxisMove(int axis, double value)
 {
     axisPosWidget(axis)->setVisible(value == 0.0 ? false : true);
+    switch (axis) {
+    case GameIO::ButtonL2:
+    case GameIO::ButtonR2:
+        axisValueWidget(axis)->setValue(value * 100);
+        break;
 
-    if (value < 0.0)
-        value += 0.5;
-    else if (value > 0.0)
-        value -= 0.5;
-
-    axisValueWidget(axis)->setValue((value) * 100);
+    default:
+        axisValueWidget(axis)->setValue(value * 100);
+        break;
+    }
 }
 
 QLabel *GamepadWidget::axisPosWidget(int axis) const

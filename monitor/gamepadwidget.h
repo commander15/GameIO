@@ -25,6 +25,9 @@ public:
     void setGamepad(GameIO::Gamepad *gamepad);
 
 private:
+    Q_SLOT void changeColor();
+    Q_SLOT void vibrate();
+
     QPoint buttonPos(int button) const;
     QList<int> buttons() const;
     Q_SLOT void processButtonChange(int button, double pression);
@@ -40,6 +43,8 @@ private:
 
     QHash<int, QLabel *> m_buttons;
     QHash<int, QLabel *> m_axes;
+
+    GameIO::Gamepad *m_gamepad;
 };
 
 #endif // GAMEPADWIDGET_H
