@@ -73,6 +73,22 @@ void Gamepad::setLedColor(int red, int green, int blue)
     }
 }
 
+void Gamepad::vibrate()
+{
+    SDL_HapticRumbleInit(d->haptic());
+    SDL_HapticRumblePlay(d->haptic(), 32, 64);
+    return;
+    SDL_HapticEffect effect;
+    effect.type = SDL_HAPTIC_CONSTANT;
+    effect.constant.type = SDL_HAPTIC_CONSTANT;
+    effect.constant.direction.dir[0] = 9000;
+    effect.constant.length = SDL_HAPTIC_INFINITY;
+
+    int effectId = SDL_HapticNewEffect(d->haptic(), &effect);
+
+    SDL_HapticRunEffect(d->haptic(), effectId, 1);
+}
+
 bool Gamepad::buttonLeft() const
 {
     return d->buttons.value(ButtonLeft);
@@ -215,10 +231,10 @@ void Gamepad::processGamepadName(int id, const QString &name)
 
 void Gamepad::processButtonPress(int id, int button, double value)
 {
-    if (d->id != id || (d->buttons.contains(button) && d->buttons.value(button) == value))
-        return;
+    //if (d->id != id || (d->buttons.contains(button) && d->buttons.value(button) == value))
+    //    return;
 
-    d->buttons.insert(button, value);
+    //d->buttons.insert(button, value);
 
     switch (button) {
     case ButtonLeft:
@@ -300,10 +316,10 @@ void Gamepad::processButtonPress(int id, int button, double value)
 
 void Gamepad::processButtonRelease(int id, int button)
 {
-    if (d->id != id || (d->buttons.contains(button) && d->buttons.value(button) == 0.0))
-        return;
+    //if (d->id != id || (d->buttons.contains(button) && d->buttons.value(button) == 0.0))
+    //    return;
 
-    d->buttons.insert(button, false);
+    //d->buttons.insert(button, false);
 
     switch (button) {
     case ButtonLeft:
@@ -385,10 +401,10 @@ void Gamepad::processButtonRelease(int id, int button)
 
 void Gamepad::processAxisMove(int id, int axis, double value)
 {
-    if (d->id != id || d->axis.value(axis) == value)
-        return;
+    //if (d->id != id || d->axis.value(axis) == value)
+    //    return;
 
-    d->axis.insert(axis, value);
+    //d->axis.insert(axis, value);
 
     switch (axis) {
     case AxisLeftX:
@@ -453,6 +469,11 @@ SDL_GameController *GamepadPrivate::controller() const
 SDL_Joystick *GamepadPrivate::joystick() const
 {
     return manager()->gamepadJoystick(id);
+}
+
+SDL_Haptic *GamepadPrivate::haptic() const
+{
+    return manager()->gamepadHaptic(id);
 }
 
 GamepadManagerPrivate *GamepadPrivate::manager() const

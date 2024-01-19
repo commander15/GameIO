@@ -6,6 +6,8 @@
 #include <QtCore/qhash.h>
 
 #include <SDL2/SDL_gamecontroller.h>
+#include <SDL2/SDL_joystick.h>
+#include <SDL2/SDL_haptic.h>
 
 namespace GameIO {
 class GamepadManagerPrivate;
@@ -17,6 +19,7 @@ public:
 
     SDL_GameController *controller() const;
     SDL_Joystick *joystick() const;
+    SDL_Haptic *haptic() const;
 
     GamepadManagerPrivate *manager() const;
 
