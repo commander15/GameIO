@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     win.show();
 
     GamepadLogger gamepad(gamepadId());
+
     win.setGamepad(&gamepad);
     //QObject::connect(&gamepad, &GameIO::Gamepad::disconnected, &app, &QCoreApplication::quit);
 
