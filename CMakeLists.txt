@@ -1,40 +1,119 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.30)
 
 project(GameIO
-    DESCRIPTION "Gaming Input Output Library"
-    VERSION     1.0.0
+    DESCRIPTION "Gaming I/O Qt library"
+    VERSION     "2.0.0"
     LANGUAGES   CXX C
 )
 
-option(GAMEIO_BUILD_TEST    "Build tests" OFF)
-option(GAMEIO_BUILD_MONITOR "Build gamepad monitor tool")
+# Project settings
+
+option(GAMEIO_BUILD_MONITOR      OFF "Build GameIO monitor tool")
+option(GAMEIO_BUILD_QML          OFF "Build GameIO QML module")
+option(GAMEIO_BUILD_TESTS        OFF "Build GameIO tests")
+option(GAMEIO_BUILD_DOCS         OFF "Build GameIO documentation")
+option(GAMEIO_BUILD_TRANSLATIONS OFF "Build GameIO translations")
+option(GAMEIO_BUILD_EXAMPLES     OFF "Build GameIO examples")
+
+set(GAMEIO_LOCALES en fr)
+
+# CMake settings
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
+# CXX Standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+# C Standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+# Registering project module path
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# Including utility scripts
+include(cmake/Utils.cmake)
+
+# Qt setup
+
+set(QT_QML_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/qml)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Cm REQUIRED)
+set(Qt_MODULES Core Gui)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+if (GAMEIO_BUILD_MONITOR)
+    list(APPEND Qt_MODULES Widgets)
+endif()
 
-find_package(SDL2 REQUIRED)
+if (GAMEIO_BUILD_QML)
+    list(APPEND Qt_MODULES Qml)
+endif()
 
-cm_add_package(GameIO
-    NAME    GameIO
-    VERSION ${GameIO_VERSION}
-    EXPORTS GameIOTargets
+if (GAMEIO_BUILD_TESTS)
+    list(APPEND Qt_MODULES Test)
+endif()
+
+if (GAMEIO_BUILD_TRANSLATIONS)
+    list(APPEND Qt_MODULES LinguistTools)
+endif()
+
+find_package(Qt6 REQUIRED COMPONENTS ${Qt_MODULES})
+
+qt_standard_project_setup(
+    REQUIRES 6.8.0
+    I18N_SOURCE_LANGUAGE      en
+    I18N_TRANSLATED_LANGUAGES ${GAMEIO_LOCALES}
 )
 
-add_subdirectory(src)
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0002 NEW)
+qt_policy(SET QTP0003 NEW)
 
-if (GAMEIO_BUILD_TEST)
-    add_subdirectory(test)
-endif()
+# Other dependencies
+find_package(SDL2 REQUIRED)
+
+# Project directories
+
+add_subdirectory(src)
 
 if (GAMEIO_BUILD_MONITOR)
     add_subdirectory(monitor)
 endif()
 
-cm_install(PACKAGES GameIO
-    DESTINATION lib/cmake
-)
+if (GAMEIO_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
+
+if (GAMEIO_BUILD_DOCS)
+    add_subdirectory(docs)
+endif()
+
+if (GAMEIO_BUILD_TRANSLATIONS)
+    qt_collect_translation_source_targets(SOURCE_TARGETS)
+
+    qt_add_translations(GameIO SOURCE_TARGETS ${SOURCE_TARGETS}
+        TS_FILE_BASE gameio
+        TS_FILE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/translations
+        QM_FILES_OUTPUT_VARIABLE QM_FILES
+    )
+    
+    # Ensure the build directory has a translations folder
+    set(TRANSLATIONS_BUILD_DIR "${CMAKE_BINARY_DIR}/translations")
+    file(MAKE_DIRECTORY ${TRANSLATIONS_BUILD_DIR})
+
+    # Copy QM files to build directory after they are generated
+    add_custom_command(
+        TARGET GameIO_lrelease POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} ${TRANSLATIONS_BUILD_DIR}
+        COMMENT "Copying generated QM files to ${TRANSLATIONS_BUILD_DIR}"
+    )
+
+    install(FILES ${QM_FILES} DESTINATION translations)
+endif()
+
+if (GAMEIO_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()

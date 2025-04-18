@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/gameio">
         <file>configs/gamecontrollerdb_linux.txt</file>
         <file>configs/gamecontrollerdb_windows.txt</file>
     </qresource>

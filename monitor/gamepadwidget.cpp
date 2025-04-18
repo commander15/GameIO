@@ -1,6 +1,8 @@
 #include "gamepadwidget.h"
 #include "ui_gamepadwidget.h"
 
+#include <QtWidgets/qcolordialog.h>
+
 #include <GameIO/gamepad.h>
 #include <GameIO/gamepadmanager.h>
 
@@ -74,15 +76,56 @@ void GamepadWidget::setGamepad(GameIO::Gamepad *gamepad)
 
 void GamepadWidget::changeColor()
 {
-    QColor color(ui->colorInput->text());
-    ui->colorInput->setStyleSheet("color: " + color.name());
+    if (!m_gamepad)
+        return;
+
+    QColor color = QColorDialog::getColor(Qt::black, this, tr("Pick a color !"));
+    ui->colorOutput->setStyleSheet("background-color: " + color.name(QColor::HexRgb));
     m_gamepad->setLedColor(color);
 }
 
 void GamepadWidget::vibrate()
 {
-    if (m_gamepad)
-        m_gamepad->vibrate();
+    if (!m_gamepad)
+        return;
+
+    qreal strength = qreal(ui->vibrationStrengthInput->value()) / 100;
+    int duration = ui->vibrationDurationInput->value();
+    m_gamepad->vibrate(strength, duration);
+}
+
+void GamepadWidget::processButtonChange(int button, double pression)
+{
+    QWidget *w = buttonWidget(button);
+    w->setVisible(pression == 1.0 ? true : false);
+
+    switch (button) {
+    case GameIO::ButtonL2:
+        ui->l2Output->setValue(pression * 100);
+        break;
+
+    case GameIO::ButtonR2:
+        ui->r2Output->setValue(pression * 100);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void GamepadWidget::processAxisMove(int axis, double value)
+{
+    axisPosWidget(axis)->setVisible(value == 0.0 ? false : true);
+    switch (axis) {
+    case GameIO::ButtonL2:
+    case GameIO::ButtonR2:
+        axisValueWidget(axis)->setValue(value * 100);
+        break;
+
+    default:
+        axisValueWidget(axis)->setValue(value * 100);
+        break;
+    }
 }
 
 QPoint GamepadWidget::buttonPos(int button) const
@@ -170,25 +213,6 @@ QList<int> GamepadWidget::buttons() const
            << GameIO::ButtonGuide;
 }
 
-void GamepadWidget::processButtonChange(int button, double pression)
-{
-    QWidget *w = buttonWidget(button);
-    w->setVisible(pression == 1.0 ? true : false);
-
-    switch (button) {
-    case GameIO::ButtonL2:
-        ui->l2Output->setValue(pression * 100);
-        break;
-
-    case GameIO::ButtonR2:
-        ui->r2Output->setValue(pression * 100);
-        break;
-
-    default:
-        break;
-    }
-}
-
 QLabel *GamepadWidget::buttonWidget(int button) const
 {
     return m_buttons.value(button);
@@ -217,21 +241,6 @@ QList<int> GamepadWidget::axes() const
            << GameIO::AxisLeftY
            << GameIO::AxisRightX
            << GameIO::AxisRightY;
-}
-
-void GamepadWidget::processAxisMove(int axis, double value)
-{
-    axisPosWidget(axis)->setVisible(value == 0.0 ? false : true);
-    switch (axis) {
-    case GameIO::ButtonL2:
-    case GameIO::ButtonR2:
-        axisValueWidget(axis)->setValue(value * 100);
-        break;
-
-    default:
-        axisValueWidget(axis)->setValue(value * 100);
-        break;
-    }
 }
 
 QLabel *GamepadWidget::axisPosWidget(int axis) const

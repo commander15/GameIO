@@ -12,9 +12,9 @@
 #include <SDL2/SDL_haptic.h>
 
 #ifdef Q_OS_LINUX
-#   define MAPPING_FILE ":/configs/gamecontrollerdb_linux.txt"
+#   define MAPPING_FILE ":/gameio/configs/gamecontrollerdb_linux.txt"
 #elif defined(Q_OS_WINDOWS)
-#   define MAPPING_FILE ":/configs/gamecontrollerdb_windows.txt"
+#   define MAPPING_FILE ":/gameio/configs/gamecontrollerdb_windows.txt"
 #endif
 
 #define AXIS_DEAD_ZONE 10000.0

@@ -24,18 +24,20 @@ public:
 
     void setGamepad(GameIO::Gamepad *gamepad);
 
-private:
-    Q_SLOT void changeColor();
-    Q_SLOT void vibrate();
+private slots:
+    void changeColor();
+    void vibrate();
 
+    void processButtonChange(int button, double pression);
+    void processAxisMove(int axis, double value);
+
+private:
     QPoint buttonPos(int button) const;
     QList<int> buttons() const;
-    Q_SLOT void processButtonChange(int button, double pression);
     QLabel *buttonWidget(int button) const;
 
     QPoint axisPos(int axis) const;
     QList<int> axes() const;
-    Q_SLOT void processAxisMove(int axis, double value);
     QLabel *axisPosWidget(int axis) const;
     QProgressBar *axisValueWidget(int axis) const;
 

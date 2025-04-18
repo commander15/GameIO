@@ -46,7 +46,8 @@ public:
     int ledBlue() const;
     void setLedColor(int red, int green, int blue);
 
-    void vibrate();
+    Q_SLOT void vibrate();
+    Q_SLOT void vibrate(float strength, int duration);
 
     bool buttonLeft() const;
     Q_SIGNAL void buttonLeftChanged(bool value);

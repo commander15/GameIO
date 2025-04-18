@@ -37,6 +37,14 @@ void Gamepad::setId(int id)
 
     d->id = id;
     emit idChanged(id);
+
+    GamepadManagerPrivate *man = d->manager();
+
+    d->name = man->gamepadName(id);
+    emit nameChanged(d->name);
+
+    d->connected = man->isGamepadConnected(id);
+    emit connectionStateChanged(d->connected);
 }
 
 QString Gamepad::name() const
@@ -75,8 +83,7 @@ void Gamepad::setLedColor(int red, int green, int blue)
 
 void Gamepad::vibrate()
 {
-    SDL_HapticRumbleInit(d->haptic());
-    SDL_HapticRumblePlay(d->haptic(), 32, 64);
+    vibrate(32, 250);
     return;
     SDL_HapticEffect effect;
     effect.type = SDL_HAPTIC_CONSTANT;
@@ -87,6 +94,12 @@ void Gamepad::vibrate()
     int effectId = SDL_HapticNewEffect(d->haptic(), &effect);
 
     SDL_HapticRunEffect(d->haptic(), effectId, 1);
+}
+
+void Gamepad::vibrate(float strength, int duration)
+{
+    SDL_HapticRumbleInit(d->haptic());
+    SDL_HapticRumblePlay(d->haptic(), strength, duration);
 }
 
 bool Gamepad::buttonLeft() const
@@ -227,6 +240,9 @@ void Gamepad::processGamepadName(int id, const QString &name)
 {
     if (d->id != id)
         return;
+
+    d->name = name;
+    emit nameChanged(name);
 }
 
 void Gamepad::processButtonPress(int id, int button, double value)

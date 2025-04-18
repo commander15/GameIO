@@ -11,16 +11,19 @@ class GamepadManagerPrivate;
 class GAMEIO_EXPORT GamepadManager : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QList<int> connectedGamepads READ connectedGamepads NOTIFY connectedGamepadsChanged FINAL)
 
 public:
     ~GamepadManager();
 
-    QString gamepadName(int id) const;
-    bool isGamepadConnected(int id) const;
+    Q_INVOKABLE QString gamepadName(int id) const;
+    Q_INVOKABLE bool isGamepadConnected(int id) const;
     QList<int> connectedGamepads() const;
-    Q_SIGNAL void connectedGamepadsChanged();
 
     static GamepadManager *instance();
+
+signals:
+    void connectedGamepadsChanged();
 
 private:
     GamepadManager();

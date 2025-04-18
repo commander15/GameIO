@@ -1,2 +1,3 @@
 # GameIO
- Gaming Input/Output Library
+
+Gaming I/O Qt library

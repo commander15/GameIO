@@ -1,6 +1,6 @@
-cm_add_executable(monitor main.cpp res.qrc
-    gamepadwidget.cpp
+qt_add_executable(Monitor main.cpp res.qrc
+    gamepadwidget.cpp gamepadwidget.ui
     gamepadlogger.cpp
 )
 
-target_link_libraries(monitor PRIVATE Qt::Widgets gameio)
+target_link_libraries(Monitor PRIVATE Qt::Widgets GameIO)
