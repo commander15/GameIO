@@ -17,8 +17,13 @@ option(GAMEIO_BUILD_EXAMPLES     OFF "Build GameIO examples")
 
 set(GAMEIO_LOCALES en fr)
 
-# CMake settings
+# CMake options
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
+# Output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # CXX Standard
 set(CMAKE_CXX_STANDARD 17)
