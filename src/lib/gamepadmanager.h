@@ -14,8 +14,6 @@ class GAMEIO_EXPORT GamepadManager : public QObject
     Q_PROPERTY(QList<int> connectedGamepads READ connectedGamepads NOTIFY connectedGamepadsChanged FINAL)
 
 public:
-    ~GamepadManager();
-
     Q_INVOKABLE QString gamepadName(int id) const;
     Q_INVOKABLE bool isGamepadConnected(int id) const;
     QList<int> connectedGamepads() const;
@@ -27,6 +25,7 @@ signals:
 
 private:
     GamepadManager();
+    ~GamepadManager();
 
     QScopedPointer<GamepadManagerPrivate> d;
     static QScopedPointer<GamepadManager> self;

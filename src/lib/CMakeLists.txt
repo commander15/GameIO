@@ -40,7 +40,7 @@ target_compile_definitions(GameIO
         GAMEIO_BUILD
 )
 
-target_link_libraries(GameIO PUBLIC Qt::Core Qt::Gui SDL2::SDL2)
+target_link_libraries(GameIO PUBLIC Qt::Core SDL2::SDL2)
 
 install(TARGETS GameIO
     EXPORT GameIOTargets

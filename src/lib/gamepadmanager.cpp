@@ -20,6 +20,13 @@
 #define AXIS_DEAD_ZONE 10000.0
 
 namespace GameIO {
+/**
+ * @class GamepadManager
+ * @brief Centralized manager for handling gamepad devices.
+ *
+ * Manages connection states, input events, and device discovery for all connected game controllers.
+ * Provides access to device information and real-time input data through a unified interface.
+ */
 
 GamepadManager::GamepadManager() :
     d(new GamepadManagerPrivate(this))
@@ -32,21 +39,44 @@ GamepadManager::~GamepadManager()
     d->cleanup();
 }
 
+/*!
+ * @brief Get the gamepad name associated to the id.
+ * @param id The gamepad id
+ * @return the human readable name of the gamepad.
+ */
 QString GamepadManager::gamepadName(int id) const
 {
     return d->gamepadName(id);
 }
 
+/**
+ * @brief Checks whether a gamepad with the given device ID is currently connected.
+ *
+ * @param id The device ID of the gamepad to check.
+ * @return true if the gamepad is connected; false otherwise.
+ */
 bool GamepadManager::isGamepadConnected(int id) const
 {
     return d->isGamepadConnected(id);
 }
 
+/**
+ * @brief Returns the list of device IDs for all currently connected gamepads.
+ *
+ * @return A QList of integers representing connected gamepad device IDs.
+ */
 QList<int> GamepadManager::connectedGamepads() const
 {
     return d->m_instanceIdForIndex.keys();
 }
 
+/**
+ * @brief Returns the singleton instance of the GamepadManager.
+ *
+ * If the instance does not exist yet, it will be created (RAII).
+ *
+ * @return Pointer to the GamepadManager singleton.
+ */
 GamepadManager *GamepadManager::instance()
 {
     if (!self)
@@ -69,7 +99,7 @@ QString GamepadManagerPrivate::gamepadName(int id) const
 {
     SDL_GameController *controller = gamepadController(id);
     SDL_Joystick *joystick = SDL_GameControllerGetJoystick(controller);
-    return QString::fromUtf8(SDL_JoystickName(joystick));
+    return joystick ? QString::fromUtf8(SDL_JoystickName(joystick)) : QString();
 }
 
 bool GamepadManagerPrivate::isGamepadConnected(int id) const

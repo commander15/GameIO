@@ -1,10 +1,11 @@
 qt_add_qml_module(GameIOQml
     URI GameIO
     VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    TYPEINFO GameIO
+    CLASS_NAME GameIOQmlPlugin
+    TYPEINFO GameIO.qmltypes
     PLUGIN_TARGET GameIOQml
-    NO_GENERATE_PLUGIN_SOURCE
-    SOURCES plugin.cpp
+    SOURCES gamepadmanager.h gamepadmanager.cpp
+    SOURCES gamepad.h gamepad.cpp
 )
 
-target_link_libraries(GameIOQml PUBLIC GameIO)
+target_link_libraries(GameIOQml PUBLIC Qt::Qml Qt::Gui GameIO)

@@ -14,6 +14,6 @@ find_program(QHG_EXECUTABLE qhelpgenerator PATHS ${QtRootDir}/bin ${QtRootDir}/l
 if (DOXYGEN_EXECUTABLE)
     add_custom_target(docs ALL
         ${DOXYGEN_EXECUTABLE} "Doxyfile"
-        SOURCES Doxyfile.in
+        SOURCES Doxyfile.in MAIN.md
     )
 endif()

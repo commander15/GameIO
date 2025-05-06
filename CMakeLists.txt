@@ -9,7 +9,7 @@ project(GameIO
 # Project settings
 
 option(GAMEIO_BUILD_MONITOR      OFF "Build GameIO monitor tool")
-option(GAMEIO_BUILD_QML          OFF "Build GameIO QML module")
+option(GAMEIO_BUILD_QML          ON  "Build GameIO QML module")
 option(GAMEIO_BUILD_TESTS        OFF "Build GameIO tests")
 option(GAMEIO_BUILD_DOCS         OFF "Build GameIO documentation")
 option(GAMEIO_BUILD_TRANSLATIONS OFF "Build GameIO translations")
@@ -42,23 +42,28 @@ include(cmake/Utils.cmake)
 # Qt setup
 
 set(QT_QML_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/qml)
+set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY} CACHE STRING "")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(Qt_MODULES Core Gui)
+set(Qt_MODULES Core)
 
 if (GAMEIO_BUILD_MONITOR)
     list(APPEND Qt_MODULES Widgets)
 endif()
 
 if (GAMEIO_BUILD_QML)
-    list(APPEND Qt_MODULES Qml)
+    list(APPEND Qt_MODULES Qml Gui)
 endif()
 
 if (GAMEIO_BUILD_TESTS)
     list(APPEND Qt_MODULES Test)
+endif()
+
+if (GAMEIO_BUILD_EXAMPLES)
+    list(APPEND Qt_MODULES Quick)
 endif()
 
 if (GAMEIO_BUILD_TRANSLATIONS)
@@ -73,7 +78,10 @@ qt_standard_project_setup(
     I18N_TRANSLATED_LANGUAGES ${GAMEIO_LOCALES}
 )
 
-qt_policy(SET QTP0001 NEW)
+if (Qt6Qml_FOUND)
+    qt_policy(SET QTP0001 NEW)
+endif()
+
 qt_policy(SET QTP0002 NEW)
 qt_policy(SET QTP0003 NEW)
 
